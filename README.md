@@ -35,12 +35,18 @@ npm install
 MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority&appName=libraryDB
 PORT=3000
 
+```
+2. Install backend dependencies
+```bash
+npm install
+```
+3. Configure environment variables
+```bash
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority&appName=libraryDB
+PORT=3000
 
-cd backend
-node server.js
+```
 
-✅ MongoDB connected
-🚀 Server running on http://localhost:3000
 
 ⚙️ API Endpoints
 Method	Endpoint	Description
@@ -49,7 +55,7 @@ POST	/api/books	Add a new book
 DELETE	/api/books/:id	Delete a book
 PATCH	/api/books/:id/toggle	Toggle availability of a book
 
-'''
+```
 📌 Technologies Used
 MongoDB Atlas
 
