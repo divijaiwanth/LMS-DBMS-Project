@@ -1,28 +1,43 @@
-// backend/server.js
 const express = require('express');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const cors = require('cors');
-require('dotenv').config();
+const Book = require('./models/Book');
 
-const bookRoutes = require('./routes/bookRoutes');
-const authRoutes = require('./routes/authRoutes');
-
+dotenv.config();
 const app = express();
-const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ Connected to MongoDB Atlas'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.error('❌ MongoDB error:', err));
 
-app.use('/api/books', bookRoutes);
-app.use('/api/auth', authRoutes);
+app.get('/api/books', async (req, res) => {
+  const books = await Book.find();
+  res.json(books);
+});
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.post('/api/books', async (req, res) => {
+  const { name, author, isbn, available } = req.body;
+  const book = new Book({ name, author, isbn, available });
+  await book.save();
+  res.json(book);
+});
+
+app.delete('/api/books/:id', async (req, res) => {
+  await Book.findByIdAndDelete(req.params.id);
+  res.sendStatus(204);
+});
+
+app.patch('/api/books/:id/toggle', async (req, res) => {
+  const book = await Book.findById(req.params.id);
+  book.available = !book.available;
+  await book.save();
+  res.json(book);
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`🚀 Server running on http://localhost:${process.env.PORT || 3000}`);
 });

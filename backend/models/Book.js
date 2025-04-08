@@ -1,11 +1,10 @@
-// backend/models/Book.js
 const mongoose = require('mongoose');
 
-const bookSchema = new mongoose.Schema({
+const BookSchema = new mongoose.Schema({
   name: { type: String, required: true },
   author: { type: String, required: true },
   isbn: { type: String, required: true },
   available: { type: Boolean, default: true }
 });
 
-module.exports = mongoose.model('Book', bookSchema);
+module.exports = mongoose.model('Book', BookSchema);
