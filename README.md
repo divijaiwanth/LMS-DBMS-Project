@@ -19,23 +19,49 @@ The app lets you:
 
 ---
 
+
+---
+
 ## 🚀 Getting Started
 
 ### ✅ Prerequisites
 
-- Node.js (v16+)
-- MongoDB Atlas account (or local MongoDB if you prefer)
+- [Node.js](https://nodejs.org/) (v16+)
+- A [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
+
+---
+
+## ☁️ Setting Up MongoDB Atlas
+
+1. **Sign up** at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register)
+2. **Create a new project**
+3. **Build a cluster** (Choose a free shared cluster)
+4. **Create a Database User**
+   - Username: `your-username`
+   - Password: `your-password`
+   - Save these for later
+5. **Whitelist your IP Address**
+   - Allow access from your current IP (`0.0.0.0/0` allows from anywhere)
+6. **Connect your application**
+   - Choose "Connect your application"
+   - Copy the connection string like:
+     ```
+     mongodb+srv://your-username:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority&appName=libraryDB
+     ```
+   - Replace `<password>` with your actual password
+     - ⚠️ Make sure to **URL-encode** special characters (e.g. `@` → `%40`, `!` → `%21`)
+
+---
+
+## 🧪 Backend Setup
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-username/library-system.git
 cd library-system
-npm install
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority&appName=libraryDB
-PORT=3000
-
 ```
+
 2. Install backend dependencies
 ```bash
 npm install
