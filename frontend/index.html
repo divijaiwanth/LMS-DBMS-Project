@@ -2,73 +2,103 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Library Management</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library Dashboard</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <h1>📚 Library Management</h1>
+  <div class="glass-container">
+    <div class="top-bar">
+      <h2>📚 Library Dashboard</h2>
+      <button id="logoutBtn">Logout</button>
+    </div>
 
-  <form id="book-form">
-    <input type="text" id="name" placeholder="Book Name" required>
-    <input type="text" id="author" placeholder="Author" required>
-    <input type="text" id="isbn" placeholder="ISBN" required>
-    <label>
-      Available
-      <input type="checkbox" id="available" checked>
-    </label>
-    <button type="submit">Add Book</button>
-  </form>
+    <div id="bookList" class="book-list">
+      <!-- Books will be loaded here -->
+    </div>
 
-  <div id="books-container"></div>
+    <h3>Add New Book</h3>
+    <form id="bookForm">
+      <input type="text" name="name" placeholder="Book Name" required />
+      <input type="text" name="author" placeholder="Author" required />
+      <input type="text" name="isbn" placeholder="ISBN" required />
+      <label>
+        <input type="checkbox" name="available" />
+        Available
+      </label>
+      <button type="submit">Add Book</button>
+    </form>
+  </div>
 
   <script>
-    const form = document.getElementById('book-form');
-    const booksContainer = document.getElementById('books-container');
+    const user = JSON.parse(localStorage.getItem("user"));
+    const bookList = document.getElementById("bookList");
+    const form = document.getElementById("bookForm");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (!user) {
+      window.location.href = "login.html";
+    }
+
+    logoutBtn.onclick = () => {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    };
 
     async function fetchBooks() {
-      const res = await fetch('http://localhost:3000/api/books');
+      const res = await fetch("http://localhost:3000/api/books");
       const books = await res.json();
-      booksContainer.innerHTML = '';
-      books.forEach(book => {
-        const div = document.createElement('div');
-        div.className = 'book';
-        div.innerHTML = `
-          <h3>${book.name}</h3>
+
+      bookList.innerHTML = "";
+
+      books.forEach((book) => {
+        const bookCard = document.createElement("div");
+        bookCard.className = "book-card";
+        bookCard.innerHTML = `
+          <h4>${book.name}</h4>
           <p><strong>Author:</strong> ${book.author}</p>
           <p><strong>ISBN:</strong> ${book.isbn}</p>
-          <p><strong>Available:</strong> ${book.available ? '✅' : '❌'}</p>
-          <button onclick="deleteBook('${book._id}')">Delete</button>
-          <button onclick="toggleAvailability('${book._id}')">Toggle Availability</button>
+          <p><strong>Available:</strong> ${book.available ? "✅" : "❌"}</p>
+          ${user.role === "librarian" ? `
+          <label class="toggle">
+            <input type="checkbox" ${book.available ? "checked" : ""} onchange="toggleAvailability('${book._id}', this.checked)" />
+            Toggle Availability
+          </label>
+          ` : ""}
         `;
-        booksContainer.appendChild(div);
+        bookList.appendChild(bookCard);
       });
     }
 
-    async function deleteBook(id) {
-      await fetch(`http://localhost:3000/api/books/${id}`, { method: 'DELETE' });
-      fetchBooks();
+    async function toggleAvailability(id, available) {
+      const res = await fetch(`http://localhost:3000/api/books/${id}/availability`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ available }),
+      });
+
+      if (res.ok) fetchBooks();
+      else alert("Error updating availability");
     }
 
-    async function toggleAvailability(id) {
-      await fetch(`http://localhost:3000/api/books/${id}/toggle`, { method: 'PATCH' });
-      fetchBooks();
-    }
-
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value;
-      const author = document.getElementById('author').value;
-      const isbn = document.getElementById('isbn').value;
-      const available = document.getElementById('available').checked;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.available = formData.get("available") === "on";
 
-      await fetch('http://localhost:3000/api/books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, author, isbn, available })
+      const res = await fetch("http://localhost:3000/api/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      form.reset();
-      fetchBooks();
+      if (res.ok) {
+        form.reset();
+        fetchBooks();
+      } else {
+        alert("Failed to add book.");
+      }
     });
 
     fetchBooks();
